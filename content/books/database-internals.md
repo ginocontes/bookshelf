@@ -5,5 +5,5 @@ genre: "Databases"
 published: 2019
 pages: 370
 tags: ["O'Reilly"]
-display: false
+display: true
 ---

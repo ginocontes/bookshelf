@@ -4,5 +4,5 @@ author: "Ramez Elmasri, Shamkant B. Navathe"
 genre: "Databases"
 published: 1989
 pages: 1272
-display: false
+display: true
 ---

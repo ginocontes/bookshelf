@@ -4,5 +4,5 @@ author: "Stuart Russell, Peter Norvig"
 genre: "AI & Data"
 published: 1994
 pages: 1144
-display: false
+display: true
 ---

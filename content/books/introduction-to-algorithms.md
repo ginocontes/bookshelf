@@ -4,5 +4,5 @@ author: "Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stei
 genre: "Computer Science"
 published: 1990
 pages: 1292
-display: false
+display: true
 ---

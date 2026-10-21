@@ -1,4 +1,4 @@
-import { type Book, bookBySlug, coverWidth, genreOf } from './books';
+import { type Book, bookBySlug, books as allBooks, coverWidth, genreOf } from './books';
 
 /**
  * Where every book sits. Each shelf belongs to one genre; the desk takes anything.
@@ -20,6 +20,16 @@ export const DESK_SCALE = 0.78;
 /** Tallest a book can be, plus headroom: the height of a shelf compartment. */
 export const SHELF_HEIGHT = 272;
 const STORAGE_KEY = 'bookshelf-layout-v3';
+/**
+ * The books marked `display: true` when a layout was saved. If that list has
+ * changed since, the saved arrangement is dropped so the new choice shows.
+ */
+const displayKey = (books: Book[]) =>
+  books
+    .filter((b) => b.display)
+    .map((b) => b.slug)
+    .sort()
+    .join(',');
 /** Shelves with spare room put books face-out until they're about this full. */
 const DISPLAY_FILL = 0.7;
 
@@ -142,16 +152,30 @@ function sortShelves(shelves: Shelf[]) {
 }
 
 /**
- * Turn some books face-out on shelves with spare room, spread along the shelf,
- * so that a genre with only a handful of books still looks like a display.
+ * Turn books face-out. Books marked `display: true` come first, as long as the
+ * shelf has room. On a shelf with none marked, books that leave `display` unset
+ * are turned at evenly spread spots while the shelf has spare room, so a genre
+ * with only a handful of books still looks like a display.
  */
 function display(shelf: Shelf) {
-  const order = [...shelf.slots.keys()].sort((a, b) => (a % 3) - (b % 3) || a - b);
-  for (const i of order) {
-    const book = bookBySlug.get(shelf.slots[i].id)!;
+  const bookAt = (i: number) => bookBySlug.get(shelf.slots[i].id)!;
+  const turn = (i: number, limit: number) => {
+    const book = bookAt(i);
     const grown = usedWidth(shelf.slots, 0) - outerWidth(book, 'spine', 0) + outerWidth(book, 'cover', 0);
-    if (grown > SHELF_INNER * DISPLAY_FILL) break;
+    if (grown > limit) return false;
     shelf.slots[i] = { ...shelf.slots[i], o: 'cover' };
+    return true;
+  };
+
+  const chosen = [...shelf.slots.keys()].filter((i) => bookAt(i).display);
+  chosen.forEach((i) => turn(i, SHELF_INNER));
+  if (chosen.length) return;
+
+  const order = [...shelf.slots.keys()]
+    .filter((i) => bookAt(i).display === undefined)
+    .sort((a, b) => (a % 3) - (b % 3) || a - b);
+  for (const i of order) {
+    if (!turn(i, SHELF_INNER * DISPLAY_FILL)) break;
   }
 }
 
@@ -208,7 +232,9 @@ function isLayout(value: unknown): value is Layout {
 export function loadLayout(books: Book[]): Layout {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
-    if (isLayout(saved)) return reconcile(saved, books);
+    if (isLayout(saved) && (saved as { display?: string }).display === displayKey(books)) {
+      return reconcile(saved, books);
+    }
   } catch {
     // Storage unavailable or corrupt: fall through to a fresh arrangement.
   }
@@ -217,7 +243,7 @@ export function loadLayout(books: Book[]): Layout {
 
 export function saveLayout(layout: Layout) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...layout, display: displayKey(allBooks) }));
   } catch {
     // Private mode or storage full: the arrangement just won't persist.
   }

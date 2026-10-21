@@ -4,4 +4,5 @@ author: "Gilbert Strang"
 genre: "Mathematics"
 published: 1993
 pages: 574
+display: false
 ---

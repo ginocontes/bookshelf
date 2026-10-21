@@ -4,4 +4,5 @@ author: "Walter Isaacson"
 genre: "Biography"
 published: 2003
 pages: 590
+display: false
 ---

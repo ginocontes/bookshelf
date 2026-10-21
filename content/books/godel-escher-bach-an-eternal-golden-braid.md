@@ -4,4 +4,5 @@ author: "Douglas R. Hofstadter"
 genre: "Computer Science"
 published: 1979
 pages: 777
+display: false
 ---

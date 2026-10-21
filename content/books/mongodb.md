@@ -6,4 +6,5 @@ published: 2010
 pages: 514
 isbn: "9781449344689"
 tags: ["O'Reilly"]
+display: false
 ---

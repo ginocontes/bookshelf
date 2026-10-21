@@ -4,4 +4,5 @@ author: "James Gleick"
 genre: "Science"
 published: 1987
 pages: 364
+display: false
 ---

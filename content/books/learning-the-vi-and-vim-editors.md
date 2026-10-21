@@ -5,4 +5,5 @@ genre: "Programming"
 published: 1986
 pages: 494
 tags: ["O'Reilly"]
+display: false
 ---

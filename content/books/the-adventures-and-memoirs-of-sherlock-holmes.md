@@ -4,4 +4,5 @@ author: "Arthur Conan Doyle"
 genre: "Fiction"
 published: 2004
 pages: 569
+display: false
 ---

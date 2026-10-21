@@ -4,4 +4,5 @@ author: "Martin Kleppmann"
 genre: "Databases"
 published: 2017
 pages: 618
+display: false
 ---

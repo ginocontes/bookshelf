@@ -5,4 +5,5 @@ genre: "Philosophy"
 published: 1973
 pages: 109
 cover: false
+display: false
 ---

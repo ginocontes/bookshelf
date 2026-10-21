@@ -4,4 +4,5 @@ author: "Lisa Feldman Barrett"
 genre: "Psychology"
 published: 2017
 pages: 448
+display: false
 ---

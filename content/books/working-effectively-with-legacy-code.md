@@ -4,4 +4,5 @@ author: "Michael Feathers"
 genre: "Programming"
 published: 2004
 pages: 456
+display: false
 ---

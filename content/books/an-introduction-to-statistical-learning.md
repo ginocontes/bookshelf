@@ -5,4 +5,5 @@ genre: "AI & Data"
 published: 2013
 pages: 426
 isbn: "9781461471370"
+display: false
 ---

@@ -4,4 +4,5 @@ author: "Gregory Zuckerman"
 genre: "Finance"
 published: 2019
 pages: 359
+display: false
 ---

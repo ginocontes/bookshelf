@@ -4,4 +4,5 @@ author: "Tony Fadell"
 genre: "Business"
 published: 2022
 pages: 416
+display: false
 ---

@@ -5,4 +5,5 @@ genre: "Programming"
 published: 1999
 pages: 1648
 tags: ["O'Reilly"]
+display: false
 ---

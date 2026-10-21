@@ -16,6 +16,8 @@ export type Book = {
   started?: string;
   finished?: string;
   tags: string[];
+  /** Stand cover out (true) or spine out (false) when the shelves are set up; unset lets the shelf decide. */
+  display?: boolean;
   /** Optional explicit spine colour, otherwise sampled from the cover. */
   color?: string;
   /** Book height in base pixels (spine length). */
@@ -90,6 +92,7 @@ function parseBook(path: string, raw: string): Book {
     started: asDate(data.started),
     finished: asDate(data.finished),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
+    display: typeof data.display === 'boolean' ? data.display : undefined,
     color: typeof data.color === 'string' ? data.color : undefined,
     height,
     thickness,

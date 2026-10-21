@@ -6,4 +6,5 @@ published: 2017
 pages: 280
 isbn: "9781491935675"
 tags: ["O'Reilly"]
+display: false
 ---

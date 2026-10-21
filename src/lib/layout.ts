@@ -135,15 +135,20 @@ export function turnBook(layout: Layout, id: string): Layout | null {
   return insertBook(layout, found.c, found.index, { id, o });
 }
 
-/** Put a book spine-out on its genre's shelf, opening another shelf for the genre when full. */
+/**
+ * Put a book on its genre's shelf, opening another shelf for the genre when
+ * full. Books marked `display: true` take up their cover width from the start,
+ * so a genre gets as many shelves as it needs to show all of them.
+ */
 function shelve(shelves: Shelf[], book: Book) {
   const genre = genreOf(book);
-  let shelf = shelves.find((s, i) => s.genre === genre && canFit(s.slots, book, 'spine', i));
+  const o: Orientation = book.display ? 'cover' : 'spine';
+  let shelf = shelves.find((s, i) => s.genre === genre && canFit(s.slots, book, o, i));
   if (!shelf) {
     shelf = { genre, slots: [] };
     shelves.push(shelf);
   }
-  shelf.slots.push({ id: book.slug, o: 'spine' });
+  shelf.slots.push({ id: book.slug, o });
 }
 
 /** Shelves in alphabetical genre order (stable, so a genre's shelves keep their order). */
@@ -152,37 +157,50 @@ function sortShelves(shelves: Shelf[]) {
 }
 
 /**
- * Turn books face-out. Books marked `display: true` come first, as long as the
- * shelf has room. On a shelf with none marked, books that leave `display` unset
- * are turned at evenly spread spots while the shelf has spare room, so a genre
- * with only a handful of books still looks like a display.
+ * On a shelf where no book is marked `display: true`, turn books that leave
+ * `display` unset face-out at evenly spread spots while the shelf has spare
+ * room, so a genre with only a handful of books still looks like a display.
  */
 function display(shelf: Shelf) {
   const bookAt = (i: number) => bookBySlug.get(shelf.slots[i].id)!;
-  const turn = (i: number, limit: number) => {
-    const book = bookAt(i);
-    const grown = usedWidth(shelf.slots, 0) - outerWidth(book, 'spine', 0) + outerWidth(book, 'cover', 0);
-    if (grown > limit) return false;
-    shelf.slots[i] = { ...shelf.slots[i], o: 'cover' };
-    return true;
-  };
-
-  const chosen = [...shelf.slots.keys()].filter((i) => bookAt(i).display);
-  chosen.forEach((i) => turn(i, SHELF_INNER));
-  if (chosen.length) return;
+  if (shelf.slots.some((_, i) => bookAt(i).display)) return;
 
   const order = [...shelf.slots.keys()]
     .filter((i) => bookAt(i).display === undefined)
     .sort((a, b) => (a % 3) - (b % 3) || a - b);
   for (const i of order) {
-    if (!turn(i, SHELF_INNER * DISPLAY_FILL)) break;
+    const book = bookAt(i);
+    const grown = usedWidth(shelf.slots, 0) - outerWidth(book, 'spine', 0) + outerWidth(book, 'cover', 0);
+    if (grown > SHELF_INNER * DISPLAY_FILL) break;
+    shelf.slots[i] = { ...shelf.slots[i], o: 'cover' };
   }
+}
+
+/**
+ * Spread a genre's books evenly over its shelves, keeping their order, so a
+ * genre that just spills over doesn't leave one shelf packed and the next
+ * nearly empty. Leaves the shelves alone if an even split wouldn't fit.
+ */
+function balance(group: Shelf[]) {
+  if (group.length < 2) return;
+  const slots = group.flatMap((s) => s.slots);
+  const widths = slots.map((s) => outerWidth(bookBySlug.get(s.id)!, s.o, 0));
+  const share = widths.reduce((a, b) => a + b, 0) / group.length;
+  const split: Slot[][] = group.map(() => []);
+  let before = 0;
+  slots.forEach((slot, i) => {
+    split[Math.min(group.length - 1, Math.floor((before + widths[i] / 2) / share))].push(slot);
+    before += widths[i];
+  });
+  if (split.some((list) => !list.length || usedWidth(list, 0) > SHELF_INNER + 0.5)) return;
+  group.forEach((shelf, j) => (shelf.slots = split[j]));
 }
 
 /** A tidy starting arrangement: one shelf per genre, with spare room used for display. */
 export function initialLayout(books: Book[]): Layout {
   const shelves: Shelf[] = [];
   for (const book of books) shelve(shelves, book);
+  for (const genre of new Set(shelves.map((s) => s.genre))) balance(shelves.filter((s) => s.genre === genre));
   const sorted = sortShelves(shelves);
   sorted.forEach(display);
   return { shelves: sorted, desk: [] };

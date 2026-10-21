@@ -43,7 +43,7 @@ display: false            # true stands it cover out when the shelves are set up
 Your review here…
 ```
 
-`display` picks the books that face out. Each shelf turns its `display: true` books cover out (as many as fit) and everything else spine out. On a shelf where no book is marked, books *without* a `display` line are turned cover out automatically while the shelf has spare room. Changing which books are marked resets visitors' saved arrangements, so everyone sees your new selection.
+`display` picks the books that face out. Books marked `display: true` stand cover out and everything else spine out; a genre gets an extra shelf when its covers need the room. On a shelf where no book is marked, books *without* a `display` line are turned cover out automatically while the shelf has spare room. Changing which books are marked resets visitors' saved arrangements, so everyone sees your new selection.
 
 Then run `npm run enrich`. It looks each new book up on Open Library, downloads a cover into `content/covers/`, and adds `pages`, `published` and `author` if they're missing. It never overwrites values you wrote. If it picks the wrong edition, add the `isbn` and run `npm run enrich -- --force <slug>`, or drop your own photo in `content/covers/<slug>.jpg`.
 
